@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .task-item {
+      transition: all 0.2s ease;
+    }
+    [draggable="true"] {
+      cursor: grab;
+    }
+    .dragging {
+      opacity: 0.5;
+    }
+    aside {
+      height: 100vh;
+      overflow-y: auto;
+    }
+    aside::-webkit-scrollbar {
+      width: 6px;
+    }
+    aside::-webkit-scrollbar-thumb {
+      background-color: #d1d5db;
+      border-radius: 3px;
+    }
+    .dark aside::-webkit-scrollbar-thumb {
+      background-color: #4b5563;
+    }
+    /* Style untuk menu sidebar */
+    .sidebar-menu li {
+      padding: 10px 16px;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+    }
+    .sidebar-menu li.active-menu {
+      background-color: #f0f0f0; /* Warna latar belakang menu aktif */
+    }
+    .sidebar-menu li:hover {
+      background-color: #f0f0f0; /* Warna latar belakang saat dihover */
+    }
+    .sidebar-menu li:hover span {
+      color: #2563eb; /* Warna teks saat dihover */
+    }
+    .sidebar-menu li span {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .sidebar-menu li .task-count,
+    .sidebar-menu li .list-count {
+      background-color: #2563eb; /* Warna latar belakang counter */
+      color: white;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .sidebar-menu li .add-item {
+      color: #2563eb; /* Warna teks untuk "Add New List" dan "Add Tag" */
+    }
+    .sidebar-menu li .add-item:hover {
+      color: #1d4ed8; /* Warna teks saat dihover */
+    }
+    .sidebar-menu li .add-item svg {
+      margin-right: 4px;
+    }
+    .sidebar-menu li .tag {
+      background-color: #f0f0f0; /* Warna latar belakang tag */
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
+  <div class="flex min-h-screen">
+    <!-- Sidebar yang Diperbarui -->
+    <aside class="w-64 bg-gray-100 dark:bg-gray-800 p-4 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+      <div class="flex justify-between items-center mb-6">
+
+        
+        <h2 class="text-lg font-bold">Menu</h2>
+        <button id="toggle-mode" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+          <span id="toggle-icon">🌙</span>
+          <span class="text-sm">Toggle Mode</span>
+        </button>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="mb-6">
+        <div class="relative">
+          <input type="text" placeholder="Search" class="w-full pl-8 pr-4 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-600">
+          <svg class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Tasks Section -->
+      <div class="mb-6">
+        <h3 class="text-sm font-semibold mb-2 uppercase text-gray-500 dark:text-gray-400">Tasks</h3>
+        <ul class="sidebar-menu space-y-1">
+          <li class="flex justify-between items-center p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
+            <span class="flex items-center"><span>🗓️</span> Upcoming</span>
+            <span class="task-count bg-primary-600 text-white text-xs rounded-full px-2 py-0.5">12</span>
+          </li>
+          <li class="flex justify-between items-center p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer active-menu">
+            <span class="flex items-center"><span>☀️</span> Today</span>
+            <span id="task-count" class="task-count bg-primary-600 text-white text-xs rounded-full px-2 py-0.5">0</span>
+          </li>
+          <li class="flex justify-between items-center p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
+            <span class="flex items-center"><span>📅</span> Calendar</span>
+          </li>
+          <li class="flex justify-between items-center p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
+            <span class="flex items-center"><span>📌</span> Sticky Wall</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Lists Section -->
+      <div class="mb-6">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400">Lists</h3>
+        </div>
+        <ul class="sidebar-menu space-y-1">
+          <li class="flex justify-between items-center p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
+            <span class="flex items-center"><span>👤</span> Personal</span>
+            <span class="list-count bg-primary-600 text-white text-xs rounded-full px-2 py-0.5">3</span>
+          </li>
+          <li class="flex justify-between items-center p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
+            <span class="flex items-center"><span>💼</span> Work</span>
+            <span class="list-count bg-primary-600 text-white text-xs rounded-full px-2 py-0.5">6</span>
+          </li>
+          <li class="flex justify-between items-center p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
+            <span class="flex items-center"><span>📝</span> List 1</span>
+            <span class="list-count bg-primary-600 text-white text-xs rounded-full px-2 py-0.5">3</span>
+          </li>
+          <li class="flex items-center p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer text-primary-600 dark:text-primary-400 add-item">
+            <span class="flex items-center"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg> + Add New List</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Tags Section -->
+      <div class="mb-6">
+        <h3 class="text-sm font-semibold mb-2 uppercase text-gray-500 dark:text-gray-400">Tags</h3>
+        <div class="flex flex-wrap gap-2 mb-2">
+          <span class="tag bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-xs">Tag 1</span>
+          <span class="tag bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-xs">Tag 2</span>
+          <span class="tag bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-xs flex items-center text-primary-600 dark:text-primary-400 add-item">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg> + Add Tag
+          </span>
+        </div>
+      </div>
+
+      <!-- Bottom Menu -->
+      <div class="mt-auto">
+        <ul class="sidebar-menu space-y-1">
+          <li class="flex items-center p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
+            <span class="flex items-center"><span>⚙️</span> Settings</span>
+          </li>
+          <li class="flex items-center p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
+            <span class="flex items-center"><span>🚪</span> Sign out</span>
+          </li>
+        </ul>
+      </div>
+    
+    </aside>
+
+    <!-- Main Content (Tetap sama) -->
+    <main class="flex-1 p-6">
+      <h1 class="text-2xl font-bold mb-4 today">Today</h1>
+
+      <div class="space-y-4 mb-6">
+        <input id="title-input" type="text" placeholder="Add New Task" 
+               class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-600">
+        <textarea id="desc-input" rows="2" placeholder="Description" 
+                  class="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-600"></textarea>
+
+        <button id="add-btn" class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700 transition-colors">
+          Add Task
+        </button>
+      </div>
+
+      <div class="flex space-x-4 mb-4">
+        <button class="filter-btn px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-primary-600 hover:text-white text-sm transition-colors" data-filter="all">All</button>
+        <button class="filter-btn px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-primary-600 hover:text-white text-sm transition-colors" data-filter="completed">Completed</button>
+        <button class="filter-btn px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-primary-600 hover:text-white text-sm transition-colors" data-filter="pending">Pending</button>
+      </div>
+
+      <ul id="task-list" class="space-y-3"></ul>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

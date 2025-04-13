@@ -1,0 +1,103 @@
+/* General styles */
+.task-item {
+  transition: all 0.3s ease;
+}
+
+/* Drag and drop styling */
+.task-item[draggable="true"] {
+  cursor: move;
+}
+
+.task-item.dragging {
+  opacity: 0.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .flex {
+    flex-direction: column;
+  }
+  aside {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid;
+  }
+}
+
+/* Style for task items */
+.task-item {
+  border-left-width: 5px;
+  border-left-style: solid;
+}
+
+/* Style for pending tasks */
+.task-item.pending {
+  border-left-color: red;
+}
+
+/* Style for completed tasks */
+.task-item.completed {
+  border-left-color: green;
+}
+
+.today-dark {
+  color: #333; /* Warna untuk mode terang */
+}
+.dark .today-dark { /* Mengganti selector untuk dark mode */
+  color: white; /* Warna untuk mode gelap */
+}
+
+.sidebar-menu li span span { /* Style untuk emoji */
+  margin-right: 5px; /* Tambahkan jarak antara emoji dan teks */
+}
+
+h1.today { /* Tambahkan class today ke h1 */
+  color: black;
+}
+.dark h1.today {
+  color: white;
+}
+
+/* Style untuk menu sidebar - Hover effect */
+.sidebar-menu li {
+  padding: 10px 16px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease; /* Tambahkan transition untuk color */
+}
+
+.sidebar-menu li:hover {
+  background-color: transparent; /* No background on hover */
+}
+
+.sidebar-menu li:hover span:first-child { /* Target only the text on hover */
+  color: #2563eb; /* Change text color on hover */
+}
+
+.sidebar-menu li span {
+  font-size: 14px;
+  font-weight: 500;
+}
+.sidebar-menu li .task-count,
+.sidebar-menu li .list-count {
+  background-color: #2563eb;
+  color: white;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.sidebar-menu li .add-item {
+  color: #2563eb;
+}
+.sidebar-menu li .add-item:hover {
+  color: #1d4ed8;
+}
+.sidebar-menu li .add-item svg {
+  margin-right: 4px;
+}
+.sidebar-menu li .tag {
+  background-color: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
